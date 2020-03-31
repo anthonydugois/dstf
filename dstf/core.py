@@ -39,6 +39,12 @@ class Task:
 
         self.constraints = collections.OrderedDict()
 
+    def __contains__(self, constraint_cls):
+        return constraint_cls in self.constraints
+
+    def __getitem__(self, constraint_cls):
+        return self.constraints[constraint_cls]
+
     def __getattr__(self, attr):
         for ctr in self.constraints.values():
             if attr in ctr.__dict__:
