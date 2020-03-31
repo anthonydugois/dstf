@@ -45,10 +45,10 @@ class Task:
 
         self.constraints = collections.OrderedDict()
 
-    def __contains__(self, constraint_cls):
+    def __contains__(self, constraint_cls) -> bool:
         return constraint_cls in self.constraints
 
-    def __getitem__(self, constraint_cls):
+    def __getitem__(self, constraint_cls) -> "Constraint":
         return self.constraints[constraint_cls]
 
     def __getattr__(self, attr):
@@ -58,8 +58,10 @@ class Task:
 
         raise AttributeError("'{}' task has no attribute '{}'".format(self.name, attr))
 
-    def set(self, constraint):
+    def set(self, constraint) -> "Task":
         self.constraints[type(constraint)] = constraint
+
+        return self
 
 
 class Chunk:
