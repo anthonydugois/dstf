@@ -1,6 +1,6 @@
 import abc
 import collections
-from typing import Iterator, List, Dict
+from typing import Iterator, Any, List, Dict
 
 
 class Error(Exception):
@@ -14,6 +14,12 @@ class ConstraintError(Error):
 class Constraint(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
+        pass
+
+
+class Property(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
+    def get(self, schedule: "Schedule") -> Any:
         pass
 
 
@@ -86,7 +92,10 @@ class Schedule:
     def __len__(self) -> int:
         return len(self.chunk_map)
 
-    def update(self, operator: "Operator") -> "Schedule":
+    def get(self, prop: "Property") -> Any:
+        return prop.get(self)
+
+    def apply(self, operator: "Operator") -> "Schedule":
         return operator.apply(self)
 
     def append(self, task: "Task", start_time: float, proc_times: Dict["Node", float]):

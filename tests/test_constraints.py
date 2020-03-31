@@ -4,7 +4,7 @@ from dstf import *
 def test_is_valid__idle():
     task = Task("t0")
     node = Node("n0")
-    sched = Schedule().update(AppendOperator(task, 10, {node: 10}))
+    sched = Schedule().apply(AppendOperator(task, 10, {node: 10}))
 
     ctr = IdleConstraint()
 
@@ -18,7 +18,7 @@ def test_is_valid__idle():
 def test_is_valid__processing_times():
     task = Task("t0")
     node = Node("n0")
-    sched = Schedule().update(AppendOperator(task, 0, {node: 5}))
+    sched = Schedule().apply(AppendOperator(task, 0, {node: 5}))
 
     ctr = ProcessingTimesConstraint({node: 10})
 

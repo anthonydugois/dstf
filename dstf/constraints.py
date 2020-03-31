@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 from dstf.core import Constraint, Schedule, Chunk, Node
-from dstf.properties import processed_times
+from dstf.properties import ProcessedTimesProperty
 
 
 class IdleConstraint(Constraint):
@@ -22,7 +22,7 @@ class ProcessingTimesConstraint(Constraint):
         self.processing_times = processing_times
 
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
-        prcs_times = processed_times(schedule, chunk.task)
+        prcs_times = schedule.get(ProcessedTimesProperty(chunk.task))
 
         for node, ptime in chunk.proc_times.items():
             if prcs_times is None:
