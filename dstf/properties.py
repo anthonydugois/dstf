@@ -83,3 +83,35 @@ class CompletionTimeProperty(Property):
             return inf
 
         return max(chk.start_time + max(ptime for ptime in chk.proc_times.values()) for chk in schedule[self.task])
+
+
+class MaxCompletionTimeProperty(Property):
+    def get(self, schedule: "Schedule") -> float:
+        ctimes = []
+
+        for task in schedule:
+            ctime = schedule.get(CompletionTimeProperty(task))
+
+            if ctime != inf:
+                ctimes.append(ctime)
+
+        if len(ctimes) <= 0:
+            return inf
+
+        return max(ctimes)
+
+
+class SumCompletionTimeProperty(Property):
+    def get(self, schedule: "Schedule") -> float:
+        ctimes = []
+
+        for task in schedule:
+            ctime = schedule.get(CompletionTimeProperty(task))
+
+            if ctime != inf:
+                ctimes.append(ctime)
+
+        if len(ctimes) <= 0:
+            return inf
+
+        return sum(ctimes)

@@ -47,3 +47,19 @@ def test_get__completion_time():
     assert sched.get(CompletionTimeProperty(tasks[0])) == 15
     assert sched.get(CompletionTimeProperty(tasks[1])) == inf
     assert sched.get(CompletionTimeProperty(tasks[2])) == inf
+
+
+def test_get__max_completion_time():
+    node = Node("n0")
+    tasks = [Task("t{}".format(i)).set(ProcessingTimesConstraint({node: 10})) for i in range(3)]
+    sched = Schedule().apply(AppendOperator(tasks[0], 5, {node: 10})).apply(AppendOperator(tasks[1], 15, {node: 10}))
+
+    assert sched.get(MaxCompletionTimeProperty()) == 25
+
+
+def test_get__sum_completion_time():
+    node = Node("n0")
+    tasks = [Task("t{}".format(i)).set(ProcessingTimesConstraint({node: 10})) for i in range(3)]
+    sched = Schedule().apply(AppendOperator(tasks[0], 5, {node: 10})).apply(AppendOperator(tasks[1], 15, {node: 10}))
+
+    assert sched.get(SumCompletionTimeProperty()) == 40
