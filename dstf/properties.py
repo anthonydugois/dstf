@@ -1,14 +1,14 @@
 from math import inf
-from typing import Optional, Dict
+from typing import Optional, Any, Dict
 
-from dstf.core import Property, Schedule, Task, Node
+from dstf.core import Property, Schedule, Task
 
 
 class ProcessedTimesProperty(Property):
     def __init__(self, task: "Task"):
         self.task = task
 
-    def get(self, schedule: "Schedule") -> Optional[Dict["Node", float]]:
+    def get(self, schedule: "Schedule") -> Optional[Dict[Any, float]]:
         if self.task not in schedule:
             return None
 

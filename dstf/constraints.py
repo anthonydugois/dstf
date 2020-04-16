@@ -1,6 +1,6 @@
-from typing import List, Dict
+from typing import Any, List, Dict
 
-from dstf.core import Constraint, Schedule, Chunk, Node
+from dstf.core import Constraint, Schedule, Chunk
 from dstf.properties import ProcessedTimesProperty
 
 
@@ -18,7 +18,7 @@ class IdleConstraint(Constraint):
 
 
 class ProcessingTimesConstraint(Constraint):
-    def __init__(self, processing_times: Dict["Node", float]):
+    def __init__(self, processing_times: Dict[Any, float]):
         self.processing_times = processing_times
 
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
@@ -57,7 +57,7 @@ class DeadlineConstraint(Constraint):
 
 
 class MultipurposeMachinesConstraint(Constraint):
-    def __init__(self, compatible_nodes: List["Node"]):
+    def __init__(self, compatible_nodes: List[Any]):
         self.compatible_nodes = compatible_nodes
 
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
@@ -77,7 +77,7 @@ class ExecutionSizeConstraint(Constraint):
 
 
 class ExecutionNodesConstraint(Constraint):
-    def __init__(self, execution_nodes: List["Node"]):
+    def __init__(self, execution_nodes: List[Any]):
         self.execution_nodes = execution_nodes
 
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:

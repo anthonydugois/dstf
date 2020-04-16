@@ -24,7 +24,7 @@ class Property(metaclass=abc.ABCMeta):
 
 
 class Operator(metaclass=abc.ABCMeta):
-    def __init__(self, task: "Task", start_time: float, proc_times: Dict["Node", float]):
+    def __init__(self, task: "Task", start_time: float, proc_times: Dict[Any, float]):
         self.task = task
         self.start_time = start_time
         self.proc_times = proc_times
@@ -32,11 +32,6 @@ class Operator(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def apply(self, schedule: "Schedule") -> "Schedule":
         pass
-
-
-class Node:
-    def __init__(self, name: str):
-        self.name = name
 
 
 class Task:
@@ -65,7 +60,7 @@ class Task:
 
 
 class Chunk:
-    def __init__(self, task: "Task", start_time: float, proc_times: Dict["Node", float]):
+    def __init__(self, task: "Task", start_time: float, proc_times: Dict[Any, float]):
         self.task = task
         self.start_time = start_time
         self.proc_times = proc_times
@@ -100,7 +95,7 @@ class Schedule:
     def apply(self, operator: "Operator") -> "Schedule":
         return operator.apply(self)
 
-    def append(self, task: "Task", start_time: float, proc_times: Dict["Node", float]):
+    def append(self, task: "Task", start_time: float, proc_times: Dict[Any, float]):
         chunk = Chunk(task, start_time, proc_times)
 
         if not chunk.is_valid(self):
