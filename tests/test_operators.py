@@ -3,7 +3,7 @@ from dstf import *
 
 def test_apply__append():
     task = Task("t0")
-    node = Node("n0")
+    node = "n0"
     sched = Schedule().apply(AppendOperator(task, 0, {node: 10}))
 
     assert task in sched
@@ -14,7 +14,7 @@ def test_apply__append():
 
 def test_apply__preempt():
     task = Task("t0")
-    node = Node("n0")
+    node = "n0"
     sched = Schedule().apply(AppendOperator(task, 0, {node: 10})).apply(PreemptOperator(task, 5, {node: 10}))
 
     assert task in sched

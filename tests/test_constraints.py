@@ -3,7 +3,7 @@ from dstf import *
 
 def test_is_valid__idle():
     task = Task("t0")
-    node = Node("n0")
+    node = "n0"
     sched = Schedule().apply(AppendOperator(task, 10, {node: 10}))
 
     ctr = IdleConstraint()
@@ -17,7 +17,7 @@ def test_is_valid__idle():
 
 def test_is_valid__processing_times():
     task = Task("t0")
-    node = Node("n0")
+    node = "n0"
     sched = Schedule().apply(AppendOperator(task, 0, {node: 5}))
 
     ctr = ProcessingTimesConstraint({node: 10})
@@ -29,7 +29,7 @@ def test_is_valid__processing_times():
 
 def test_is_valid__release_time():
     task = Task("t0")
-    node = Node("n0")
+    node = "n0"
     sched = Schedule()
 
     ctr = ReleaseTimeConstraint(10)
@@ -41,7 +41,7 @@ def test_is_valid__release_time():
 
 def test_is_valid__deadline():
     task = Task("t0")
-    node = Node("n0")
+    node = "n0"
     sched = Schedule()
 
     ctr = DeadlineConstraint(10)
@@ -53,7 +53,7 @@ def test_is_valid__deadline():
 
 def test_is_valid__multipurpose_machines():
     task = Task("t0")
-    nodes = [Node("n{}".format(i)) for i in range(10)]
+    nodes = ["n{}".format(i) for i in range(10)]
     sched = Schedule()
 
     ctr = MultipurposeMachinesConstraint(nodes[:3])
@@ -66,7 +66,7 @@ def test_is_valid__multipurpose_machines():
 
 def test_is_valid__execution_size():
     task = Task("t0")
-    nodes = [Node("n{}".format(i)) for i in range(10)]
+    nodes = ["n{}".format(i) for i in range(10)]
     sched = Schedule()
 
     ctr = ExecutionSizeConstraint(2)
@@ -79,7 +79,7 @@ def test_is_valid__execution_size():
 
 def test_is_valid__execution_nodes():
     task = Task("t0")
-    nodes = [Node("n{}".format(i)) for i in range(10)]
+    nodes = ["n{}".format(i) for i in range(10)]
     sched = Schedule()
 
     ctr = ExecutionNodesConstraint(nodes[:3])

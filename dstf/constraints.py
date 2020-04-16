@@ -16,6 +16,9 @@ class IdleConstraint(Constraint):
 
         return True
 
+    def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
+        return "'{}' task cannot run on a busy node".format(chunk.task.name)
+
 
 class ProcessingTimesConstraint(Constraint):
     def __init__(self, processing_times: Dict[Any, float]):
@@ -35,6 +38,9 @@ class ProcessingTimesConstraint(Constraint):
 
         return True
 
+    def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
+        return "'{}' task cannot run longer than {}".format(chunk.task.name, self.processing_times)
+
 
 class ReleaseTimeConstraint(Constraint):
     def __init__(self, release_time: float):
@@ -42,6 +48,9 @@ class ReleaseTimeConstraint(Constraint):
 
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         return chunk.start_time >= self.release_time
+
+    def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
+        return "'{}' task cannot start before {}".format(chunk.task.name, self.release_time)
 
 
 class DeadlineConstraint(Constraint):
@@ -55,6 +64,9 @@ class DeadlineConstraint(Constraint):
 
         return True
 
+    def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
+        return "'{}' task cannot finish after {}".format(chunk.task.name, self.deadline)
+
 
 class MultipurposeMachinesConstraint(Constraint):
     def __init__(self, compatible_nodes: List[Any]):
@@ -67,6 +79,9 @@ class MultipurposeMachinesConstraint(Constraint):
 
         return True
 
+    def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
+        return "'{}' task should be processed by a subset of {}".format(chunk.task.name, self.compatible_nodes)
+
 
 class ExecutionSizeConstraint(Constraint):
     def __init__(self, execution_size: int):
@@ -75,6 +90,9 @@ class ExecutionSizeConstraint(Constraint):
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         return len(chunk.proc_times) == self.execution_size
 
+    def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
+        return "'{}' task should be processed by {} nodes".format(chunk.task.name, self.execution_size)
+
 
 class ExecutionNodesConstraint(Constraint):
     def __init__(self, execution_nodes: List[Any]):
@@ -82,3 +100,6 @@ class ExecutionNodesConstraint(Constraint):
 
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         return set(chunk.proc_times) == set(self.execution_nodes)
+
+    def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
+        return "'{}' task should be processed by {}".format(chunk.task.name, self.execution_nodes)

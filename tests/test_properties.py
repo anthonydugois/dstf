@@ -2,7 +2,7 @@ from dstf import *
 
 
 def test_get__processed_times():
-    node = Node("n0")
+    node = "n0"
     task = Task("t0")
     sched = Schedule().apply(AppendOperator(task, 0, {node: 10})).apply(AppendOperator(task, 10, {node: 5}))
 
@@ -10,7 +10,7 @@ def test_get__processed_times():
 
 
 def test_get__started():
-    node = Node("n0")
+    node = "n0"
     tasks = [Task("t{}".format(i)) for i in range(3)]
     sched = Schedule().apply(AppendOperator(tasks[0], 0, {node: 1})).apply(AppendOperator(tasks[1], 1, {node: 0}))
 
@@ -20,7 +20,7 @@ def test_get__started():
 
 
 def test_get__completed():
-    node = Node("n0")
+    node = "n0"
     tasks = [Task("t{}".format(i)).set(ProcessingTimesConstraint({node: 10})) for i in range(3)]
     sched = Schedule().apply(AppendOperator(tasks[0], 0, {node: 10})).apply(AppendOperator(tasks[1], 10, {node: 9}))
 
@@ -30,7 +30,7 @@ def test_get__completed():
 
 
 def test_get__start_time():
-    node = Node("n0")
+    node = "n0"
     tasks = [Task("t{}".format(i)) for i in range(3)]
     sched = Schedule().apply(AppendOperator(tasks[0], 0, {node: 1})).apply(AppendOperator(tasks[1], 1, {node: 0}))
 
@@ -40,7 +40,7 @@ def test_get__start_time():
 
 
 def test_get__completion_time():
-    node = Node("n0")
+    node = "n0"
     tasks = [Task("t{}".format(i)).set(ProcessingTimesConstraint({node: 10})) for i in range(3)]
     sched = Schedule().apply(AppendOperator(tasks[0], 5, {node: 10})).apply(AppendOperator(tasks[1], 15, {node: 9}))
 
@@ -50,7 +50,7 @@ def test_get__completion_time():
 
 
 def test_get__max_completion_time():
-    node = Node("n0")
+    node = "n0"
     tasks = [Task("t{}".format(i)).set(ProcessingTimesConstraint({node: 10})) for i in range(3)]
     sched = Schedule().apply(AppendOperator(tasks[0], 5, {node: 10})).apply(AppendOperator(tasks[1], 15, {node: 10}))
 
@@ -58,7 +58,7 @@ def test_get__max_completion_time():
 
 
 def test_get__sum_completion_time():
-    node = Node("n0")
+    node = "n0"
     tasks = [Task("t{}".format(i)).set(ProcessingTimesConstraint({node: 10})) for i in range(3)]
     sched = Schedule().apply(AppendOperator(tasks[0], 5, {node: 10})).apply(AppendOperator(tasks[1], 15, {node: 10}))
 

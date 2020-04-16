@@ -1,6 +1,6 @@
 import abc
 import collections
-from typing import Iterator, Any, List, Dict
+from typing import Iterator, Any, List, Dict, Type
 
 
 class Error(Exception):
@@ -15,6 +15,9 @@ class Constraint(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         pass
+
+    def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
+        return "'{}' constraint is not met".format(type(self).__name__)
 
 
 class Property(metaclass=abc.ABCMeta):
@@ -40,20 +43,23 @@ class Task:
 
         self.constraints = collections.OrderedDict()
 
-    def __contains__(self, constraint_cls) -> bool:
+    def __contains__(self, constraint_cls: Type["Constraint"]) -> bool:
         return constraint_cls in self.constraints
 
-    def __getitem__(self, constraint_cls) -> "Constraint":
+    def __iter__(self) -> Iterator[Type["Constraint"]]:
+        return iter(self.constraints)
+
+    def __getitem__(self, constraint_cls: Type["Constraint"]) -> "Constraint":
         return self.constraints[constraint_cls]
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str):
         for ctr in self.constraints.values():
             if attr in ctr.__dict__:
                 return ctr.__dict__[attr]
 
         raise AttributeError("'{}' task has no attribute '{}'".format(self.name, attr))
 
-    def set(self, constraint) -> "Task":
+    def set(self, constraint: "Constraint") -> "Task":
         self.constraints[type(constraint)] = constraint
 
         return self
@@ -72,6 +78,16 @@ class Chunk:
 
         return True
 
+    def append_to(self, schedule: "Schedule"):
+        for ctr in self.task.constraints.values():
+            if not ctr.is_valid(schedule, self):
+                raise ConstraintError(ctr.get_error(schedule, self))
+
+        if self.task in schedule:
+            schedule[self.task].append(self)
+        else:
+            schedule[self.task] = [self]
+
 
 class Schedule:
     def __init__(self):
@@ -79,6 +95,9 @@ class Schedule:
 
     def __getitem__(self, task: "Task") -> List["Chunk"]:
         return self.chunk_map[task]
+
+    def __setitem__(self, task: "Task", chunks: List["Chunk"]):
+        self.chunk_map[task] = chunks
 
     def __contains__(self, task: "Task") -> bool:
         return task in self.chunk_map
@@ -96,12 +115,4 @@ class Schedule:
         return operator.apply(self)
 
     def append(self, task: "Task", start_time: float, proc_times: Dict[Any, float]):
-        chunk = Chunk(task, start_time, proc_times)
-
-        if not chunk.is_valid(self):
-            raise ConstraintError
-
-        if chunk.task in self.chunk_map:
-            self.chunk_map[chunk.task].append(chunk)
-        else:
-            self.chunk_map[chunk.task] = [chunk]
+        Chunk(task, start_time, proc_times).append_to(self)
