@@ -1,7 +1,6 @@
 from typing import Any, List, Dict
 
-from dstf.core import Constraint, Schedule, Chunk
-from dstf.properties import ProcessedTimesProperty
+from dstf import Constraint, Schedule, Chunk, ProcessedTimesProperty
 
 
 class IdleConstraint(Constraint):

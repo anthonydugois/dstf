@@ -1,5 +1,5 @@
-import abc
-import collections
+from abc import ABCMeta, abstractmethod
+from collections import OrderedDict
 from typing import Iterator, Any, List, Dict, Type
 
 
@@ -11,8 +11,8 @@ class ConstraintError(Error):
     pass
 
 
-class Constraint(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
+class Constraint(metaclass=ABCMeta):
+    @abstractmethod
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         pass
 
@@ -20,19 +20,19 @@ class Constraint(metaclass=abc.ABCMeta):
         return "'{}' constraint is not met".format(type(self).__name__)
 
 
-class Property(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
+class Property(metaclass=ABCMeta):
+    @abstractmethod
     def get(self, schedule: "Schedule") -> Any:
         pass
 
 
-class Operator(metaclass=abc.ABCMeta):
+class Operator(metaclass=ABCMeta):
     def __init__(self, task: "Task", start_time: float, proc_times: Dict[Any, float]):
         self.task = task
         self.start_time = start_time
         self.proc_times = proc_times
 
-    @abc.abstractmethod
+    @abstractmethod
     def apply(self, schedule: "Schedule") -> "Schedule":
         pass
 
@@ -41,7 +41,7 @@ class Task:
     def __init__(self, name: str):
         self.name = name
 
-        self.constraints = collections.OrderedDict()
+        self.constraints = OrderedDict()
 
     def __contains__(self, constraint_cls: Type["Constraint"]) -> bool:
         return constraint_cls in self.constraints
