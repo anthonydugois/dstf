@@ -20,6 +20,19 @@ class NoSimultaneousExecutionConstraint(Constraint):
         return "'{}' task cannot run on a busy node".format(chunk.task.name)
 
 
+class NoMigrationConstraint(Constraint):
+    def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
+        if chunk.task in schedule:
+            for chk in schedule[chunk.task]:
+                if not set(chk.proc_times).issuperset(chunk.proc_times):
+                    return False
+
+        return True
+
+    def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
+        pass
+
+
 class ProcessingTimesConstraint(Constraint):
     def __init__(self, processing_times: Dict[Any, float]):
         self.processing_times = processing_times

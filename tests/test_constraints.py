@@ -1,7 +1,7 @@
 from dstf import *
 
 
-def test_is_valid__idle():
+def test_is_valid__no_simultaneous_execution():
     task = Task("t0")
     node = "n0"
     sched = Schedule().apply(AppendOperator(task, 10, {node: 10}))
@@ -13,6 +13,17 @@ def test_is_valid__idle():
     assert not ctr.is_valid(sched, Chunk(task, 15, {node: 10}))
     assert not ctr.is_valid(sched, Chunk(task, 5, {node: 10}))
     assert not ctr.is_valid(sched, Chunk(task, 10, {node: 10}))
+
+
+def test_is_valid__no_migration():
+    task = Task("t0")
+    nodes = ["n{}".format(i) for i in range(3)]
+    sched = Schedule().apply(AppendOperator(task, 0, {nodes[0]: 10}))
+
+    ctr = NoMigrationConstraint()
+
+    assert ctr.is_valid(sched, Chunk(task, 10, {nodes[0]: 10}))
+    assert not ctr.is_valid(sched, Chunk(task, 10, {nodes[1]: 10}))
 
 
 def test_is_valid__processing_times():
