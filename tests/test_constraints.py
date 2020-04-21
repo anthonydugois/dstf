@@ -6,7 +6,7 @@ def test_is_valid__idle():
     node = "n0"
     sched = Schedule().apply(AppendOperator(task, 10, {node: 10}))
 
-    ctr = IdleConstraint()
+    ctr = NoSimultaneousExecutionConstraint()
 
     assert ctr.is_valid(sched, Chunk(task, 20, {node: 10}))
     assert ctr.is_valid(sched, Chunk(task, 0, {node: 10}))

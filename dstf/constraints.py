@@ -4,7 +4,7 @@ from dstf.core import Constraint, Schedule, Chunk
 from dstf.properties import ProcessedTimesProperty
 
 
-class IdleConstraint(Constraint):
+class NoSimultaneousExecutionConstraint(Constraint):
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         for tsk in schedule:
             for chk in schedule[tsk]:
