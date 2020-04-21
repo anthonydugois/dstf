@@ -9,21 +9,21 @@ def test_get__processed_times():
     assert sched.get(ProcessedTimesProperty(task)) == {node: 15}
 
 
-def test_get__started():
-    node = "n0"
-    tasks = [Task("t{}".format(i)) for i in range(3)]
-    sched = Schedule().apply(AppendOperator(tasks[0], 0, {node: 1})).apply(AppendOperator(tasks[1], 1, {node: 0}))
-
-    assert sched.get(StartedProperty(tasks[0]))
-    assert not sched.get(StartedProperty(tasks[1]))
-    assert not sched.get(StartedProperty(tasks[2]))
-
-
 def test_get__start_time():
     node = "n0"
     tasks = [Task("t{}".format(i)) for i in range(3)]
     sched = Schedule().apply(AppendOperator(tasks[0], 0, {node: 1})).apply(AppendOperator(tasks[1], 1, {node: 0}))
 
     assert sched.get(StartTimeProperty(tasks[0])) == 0
-    assert sched.get(StartTimeProperty(tasks[1])) == inf
-    assert sched.get(StartTimeProperty(tasks[2])) == inf
+    assert sched.get(StartTimeProperty(tasks[1])) == 1
+    assert sched.get(StartTimeProperty(tasks[2])) is None
+
+
+def test_get__completion_time():
+    node = "n0"
+    tasks = [Task("t{}".format(i)) for i in range(3)]
+    sched = Schedule().apply(AppendOperator(tasks[0], 0, {node: 1})).apply(AppendOperator(tasks[1], 1, {node: 0}))
+
+    assert sched.get(CompletionTimeProperty(tasks[0])) == 1
+    assert sched.get(CompletionTimeProperty(tasks[1])) == 1
+    assert sched.get(CompletionTimeProperty(tasks[2])) is None

@@ -1,4 +1,4 @@
-from dstf import Operator, Schedule
+from dstf.core import Operator, Schedule
 
 
 class AppendOperator(Operator):

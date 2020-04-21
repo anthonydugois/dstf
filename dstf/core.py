@@ -66,6 +66,10 @@ class Task:
 
 
 class Chunk:
+    @property
+    def completion_time(self):
+        return self.start_time + max(ptime for ptime in self.proc_times.values())
+
     def __init__(self, task: "Task", start_time: float, proc_times: Dict[Any, float]):
         self.task = task
         self.start_time = start_time
