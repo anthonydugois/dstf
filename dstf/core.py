@@ -33,7 +33,7 @@ class Operator(metaclass=ABCMeta):
         self.proc_times = proc_times
 
     @abstractmethod
-    def apply(self, schedule: "Schedule") -> "Schedule":
+    def apply(self, schedule: "Schedule"):
         pass
 
 
@@ -127,9 +127,6 @@ class Schedule:
         return prop.get(self)
 
     def apply(self, operator: "Operator") -> "Schedule":
-        return operator.apply(self)
-
-    def append(self, task: "Task", start_time: float, proc_times: Dict[Any, float]) -> "Schedule":
-        Chunk(task, start_time, proc_times).append_to(self)
+        operator.apply(self)
 
         return self
