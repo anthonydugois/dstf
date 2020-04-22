@@ -1,26 +1,25 @@
-from dstf.core import Operator, Schedule
+from dstf.core import Operator, Schedule, Chunk
 
 
 class AppendOperator(Operator):
     def apply(self, schedule: "Schedule") -> "Schedule":
-        next_sched = Schedule()
+        chunk_map = schedule.chunk_map.copy()
 
-        for tsk in schedule:
-            for chk in schedule[tsk]:
-                next_sched.append(chk.task, chk.start_time, chk.proc_times)
+        for tsk in chunk_map:
+            chunk_map[tsk] = chunk_map[tsk].copy()
 
-        next_sched.append(self.task, self.start_time, self.proc_times)
-
-        return next_sched
+        return Schedule(chunk_map).append(self.task, self.start_time, self.proc_times)
 
 
 class PreemptOperator(Operator):
     def apply(self, schedule: "Schedule") -> "Schedule":
-        next_sched = Schedule()
+        chunk_map = schedule.chunk_map.copy()
 
-        for tsk in schedule:
-            for chk in schedule[tsk]:
-                proc_times = dict(chk.proc_times)
+        for tsk in chunk_map:
+            chunk_map[tsk] = chunk_map[tsk].copy()
+
+            for chk in chunk_map[tsk]:
+                proc_times = chk.proc_times.copy()
 
                 for node, ptime in self.proc_times.items():
                     if node in proc_times and chk.start_time <= self.start_time < chk.start_time + proc_times[node]:
@@ -29,9 +28,10 @@ class PreemptOperator(Operator):
                         else:
                             proc_times[node] = self.start_time - chk.start_time
 
-                if proc_times:
-                    next_sched.append(chk.task, chk.start_time, proc_times)
+                if proc_times != chk.proc_times:
+                    chunk_map[tsk].remove(chk)
 
-        next_sched.append(self.task, self.start_time, self.proc_times)
+                    if proc_times:
+                        chunk_map[tsk].append(Chunk(chk.task, chk.start_time, proc_times))
 
-        return next_sched
+        return Schedule(chunk_map).append(self.task, self.start_time, self.proc_times)

@@ -5,12 +5,12 @@ from dstf import *
 
 def test_set__task():
     task = Task("t0")
-    ctr = IdleConstraint()
+    ctr = NoSimultaneousExecutionConstraint()
 
     task.set(ctr)
 
-    assert IdleConstraint in task
-    assert task[IdleConstraint] == ctr
+    assert NoSimultaneousExecutionConstraint in task
+    assert task[NoSimultaneousExecutionConstraint] == ctr
 
 
 def test_getattr__task():

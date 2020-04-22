@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
-from typing import Iterator, Any, List, Dict, Type
+from typing import Iterator, Any, List, Dict, Type, Optional
 
 
 class Error(Exception):
@@ -94,8 +94,11 @@ class Chunk:
 
 
 class Schedule:
-    def __init__(self):
-        self.chunk_map = {}
+    def __init__(self, chunk_map: Optional[Dict["Task", List["Chunk"]]] = None):
+        if chunk_map is None:
+            self.chunk_map = {}
+        else:
+            self.chunk_map = chunk_map
 
     def __getitem__(self, task: "Task") -> List["Chunk"]:
         return self.chunk_map[task]
@@ -118,5 +121,7 @@ class Schedule:
     def apply(self, operator: "Operator") -> "Schedule":
         return operator.apply(self)
 
-    def append(self, task: "Task", start_time: float, proc_times: Dict[Any, float]):
+    def append(self, task: "Task", start_time: float, proc_times: Dict[Any, float]) -> "Schedule":
         Chunk(task, start_time, proc_times).append_to(self)
+
+        return self
