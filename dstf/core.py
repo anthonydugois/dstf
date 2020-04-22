@@ -115,6 +115,14 @@ class Schedule:
     def __len__(self) -> int:
         return len(self.chunk_map)
 
+    def copy(self):
+        chunk_map = self.chunk_map.copy()
+
+        for tsk in chunk_map:
+            chunk_map[tsk] = chunk_map[tsk].copy()
+
+        return Schedule(chunk_map)
+
     def get(self, prop: "Property") -> Any:
         return prop.get(self)
 
