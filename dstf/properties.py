@@ -42,4 +42,4 @@ class CompletionTimeProperty(Property):
         if self.task not in schedule:
             return None
 
-        return max(chk.completion_time for chk in schedule[self.task])
+        return max(max(chk.completion_time(node) for node in chk.proc_times) for chk in schedule[self.task])

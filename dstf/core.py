@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
+from math import inf
 from typing import Iterator, Any, List, Dict, Type, Optional
 
 
@@ -66,14 +67,16 @@ class Task:
 
 
 class Chunk:
-    @property
-    def completion_time(self):
-        return self.start_time + max(ptime for ptime in self.proc_times.values())
-
     def __init__(self, task: "Task", start_time: float, proc_times: Dict[Any, float]):
         self.task = task
         self.start_time = start_time
         self.proc_times = proc_times
+
+    def completion_time(self, node: Any) -> float:
+        if node in self.proc_times:
+            return self.start_time + self.proc_times[node]
+        else:
+            return inf
 
     def is_valid(self, schedule: "Schedule") -> bool:
         for ctr in self.task.constraints.values():
@@ -91,6 +94,55 @@ class Chunk:
             schedule[self.task].append(self)
         else:
             schedule[self.task] = [self]
+
+
+class ChunkNode:
+    def __init__(self, chunk: "Chunk"):
+        self.chunk = chunk
+        self.left = None
+        self.right = None
+
+
+class ChunkTree:
+    def __init__(self, node: Any):
+        self.node = node
+        self.root = None
+
+    def add(self, chunk: "Chunk") -> "ChunkTree":
+        if self.root is None:
+            self.root = ChunkNode(chunk)
+        else:
+            self.insert(self.root, chunk)
+
+        return self
+
+    def insert(self, parent: "ChunkNode", chunk: "Chunk") -> "ChunkTree":
+        if chunk.completion_time(self.node) <= parent.chunk.start_time:
+            if parent.left is None:
+                parent.left = ChunkNode(chunk)
+            else:
+                self.insert(parent.left, chunk)
+        elif chunk.start_time >= parent.chunk.completion_time(self.node):
+            if parent.right is None:
+                parent.right = ChunkNode(chunk)
+            else:
+                self.insert(parent.right, chunk)
+
+        return self
+
+    def get(self, time: float) -> Optional["Chunk"]:
+        current = self.root
+
+        while (current is not None
+               and (time < current.chunk.start_time or time >= current.chunk.completion_time(self.node))):
+            if time < current.chunk.start_time and current.left is not None:
+                current = current.left
+            elif time >= current.chunk.completion_time(self.node) and current.right is not None:
+                current = current.right
+            else:
+                current = None
+
+        return current
 
 
 class Schedule:
