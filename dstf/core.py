@@ -90,10 +90,16 @@ class Chunk:
             if not ctr.is_valid(schedule, self):
                 raise ConstraintError(ctr.get_error(schedule, self))
 
-        if self.task in schedule:
-            schedule[self.task].append(self)
+        if self.task in schedule.chunk_map:
+            schedule.chunk_map[self.task].append(self)
         else:
-            schedule[self.task] = [self]
+            schedule.chunk_map[self.task] = [self]
+
+        for node in self.proc_times:
+            if node in schedule.nodemap:
+                schedule.nodemap[node].add(self)
+            else:
+                schedule.nodemap[node] = ChunkTree(node).add(self)
 
 
 class ChunkNode:
@@ -151,6 +157,8 @@ class Schedule:
             self.chunk_map = {}
         else:
             self.chunk_map = chunk_map
+
+        self.nodemap = {}
 
     def __getitem__(self, task: "Task") -> List["Chunk"]:
         return self.chunk_map[task]

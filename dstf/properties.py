@@ -1,6 +1,22 @@
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, List
 
-from dstf.core import Property, Schedule, Task
+from dstf.core import Property, Schedule, Task, Chunk
+
+
+class ChunksAtProperty(Property):
+    def __init__(self, time: float):
+        self.time = time
+
+    def get(self, schedule: "Schedule") -> List["Chunk"]:
+        chks = []
+
+        for tree in schedule.nodemap.values():
+            node = tree.get(self.time)
+
+            if node is not None:
+                chks.append(node.chunk)
+
+        return chks
 
 
 class ProcessedTimesProperty(Property):
