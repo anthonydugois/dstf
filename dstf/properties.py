@@ -10,11 +10,12 @@ class ChunksAtProperty(Property):
     def get(self, schedule: "Schedule") -> List["Chunk"]:
         chks = []
 
-        for tree in schedule.nodemap.values():
-            node = tree.get(self.time)
+        for node in schedule.nodes():
+            tree = schedule.node(node)
+            treenode = tree.get(self.time)
 
-            if node is not None:
-                chks.append(node.chunk)
+            if treenode is not None:
+                chks.append(treenode.chunk)
 
         return chks
 
@@ -24,19 +25,19 @@ class ProcessedTimesProperty(Property):
         self.task = task
 
     def get(self, schedule: "Schedule") -> Optional[Dict[Any, float]]:
-        if self.task not in schedule:
+        if schedule.hastask(self.task):
+            prcs_times = {}
+
+            for chk in schedule.task(self.task):
+                for node, ptime in chk.proc_times.items():
+                    if node in prcs_times:
+                        prcs_times[node] += ptime
+                    else:
+                        prcs_times[node] = ptime
+
+            return prcs_times
+        else:
             return None
-
-        prcs_times = {}
-
-        for chk in schedule[self.task]:
-            for node, ptime in chk.proc_times.items():
-                if node in prcs_times:
-                    prcs_times[node] += ptime
-                else:
-                    prcs_times[node] = ptime
-
-        return prcs_times
 
 
 class StartTimeProperty(Property):
@@ -44,10 +45,10 @@ class StartTimeProperty(Property):
         self.task = task
 
     def get(self, schedule: "Schedule") -> Optional[float]:
-        if self.task not in schedule:
+        if schedule.hastask(self.task):
+            return min(chk.start_time for chk in schedule.task(self.task))
+        else:
             return None
-
-        return min(chk.start_time for chk in schedule[self.task])
 
 
 class CompletionTimeProperty(Property):
@@ -55,7 +56,7 @@ class CompletionTimeProperty(Property):
         self.task = task
 
     def get(self, schedule: "Schedule") -> Optional[float]:
-        if self.task not in schedule:
+        if schedule.hastask(self.task):
+            return max(max(chk.completion_time(node) for node in chk.proc_times) for chk in schedule.task(self.task))
+        else:
             return None
-
-        return max(max(chk.completion_time(node) for node in chk.proc_times) for chk in schedule[self.task])

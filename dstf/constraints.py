@@ -6,8 +6,8 @@ from dstf.properties import ProcessedTimesProperty
 
 class NoSimultaneousExecutionConstraint(Constraint):
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
-        for tsk in schedule:
-            for chk in schedule[tsk]:
+        for tsk in schedule.tasks():
+            for chk in schedule.task(tsk):
                 for node, ptime in chunk.proc_times.items():
                     if (node in chk.proc_times
                             and chunk.start_time < chk.start_time + chk.proc_times[node]
@@ -22,8 +22,8 @@ class NoSimultaneousExecutionConstraint(Constraint):
 
 class NoMigrationConstraint(Constraint):
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
-        if chunk.task in schedule:
-            for chk in schedule[chunk.task]:
+        if schedule.hastask(chunk.task):
+            for chk in schedule.task(chunk.task):
                 if not set(chk.proc_times).issuperset(chunk.proc_times):
                     return False
 

@@ -41,7 +41,6 @@ class Operator(metaclass=ABCMeta):
 class Task:
     def __init__(self, name: str):
         self.name = name
-
         self.constraints = OrderedDict()
 
     def __contains__(self, constraint_cls: Type["Constraint"]) -> bool:
@@ -90,10 +89,10 @@ class Chunk:
             if not ctr.is_valid(schedule, self):
                 raise ConstraintError(ctr.get_error(schedule, self))
 
-        if self.task in schedule.chunk_map:
-            schedule.chunk_map[self.task].append(self)
+        if self.task in schedule.taskmap:
+            schedule.taskmap[self.task].append(self)
         else:
-            schedule.chunk_map[self.task] = [self]
+            schedule.taskmap[self.task] = [self]
 
         for node in self.proc_times:
             if node in schedule.nodemap:
@@ -102,7 +101,7 @@ class Chunk:
                 schedule.nodemap[node] = ChunkTree(node).add(self)
 
     def remove_from(self, schedule: "Schedule"):
-        schedule.chunk_map[self.task].remove(self)
+        schedule.taskmap[self.task].remove(self)
 
         for node in self.proc_times:
             schedule.nodemap[node].remove(self)
@@ -281,36 +280,41 @@ class ChunkTree:
 
 
 class Schedule:
-    def __init__(self, chunk_map: Optional[Dict["Task", List["Chunk"]]] = None):
-        if chunk_map is None:
-            self.chunk_map = {}
-        else:
-            self.chunk_map = chunk_map
-
+    def __init__(self):
+        self.taskmap = {}
         self.nodemap = {}
 
-    def __getitem__(self, task: "Task") -> List["Chunk"]:
-        return self.chunk_map[task]
+    def tasks(self) -> Iterator["Task"]:
+        return iter(self.taskmap)
 
-    def __setitem__(self, task: "Task", chunks: List["Chunk"]):
-        self.chunk_map[task] = chunks
+    def hastask(self, task: "Task") -> bool:
+        return task in self.taskmap
 
-    def __contains__(self, task: "Task") -> bool:
-        return task in self.chunk_map
+    def task(self, task: "Task") -> Optional[List["Chunk"]]:
+        if task in self.taskmap:
+            return self.taskmap[task]
+        else:
+            return None
 
-    def __iter__(self) -> Iterator["Task"]:
-        return iter(self.chunk_map)
+    def nodes(self) -> Iterator[Any]:
+        return iter(self.nodemap)
 
-    def __len__(self) -> int:
-        return len(self.chunk_map)
+    def hasnode(self, node: Any) -> bool:
+        return node in self.nodemap
 
-    def copy(self):
-        chunk_map = self.chunk_map.copy()
+    def node(self, node: Any) -> Optional["ChunkTree"]:
+        if node in self.nodemap:
+            return self.nodemap[node]
+        else:
+            return None
 
-        for tsk in chunk_map:
-            chunk_map[tsk] = chunk_map[tsk].copy()
-
-        return Schedule(chunk_map)
+    # def copy(self):
+    #     chunk_map = self.taskmap.copy()
+    #
+    #     for tsk in chunk_map:
+    #         chunk_map[tsk] = chunk_map[tsk].copy()
+    #
+    #     return Schedule(chunk_map)
 
     def get(self, prop: "Property") -> Any:
         return prop.get(self)
