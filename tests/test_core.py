@@ -48,9 +48,9 @@ def test_append_to__chunk():
     chks[0].append_to(sched)
     chks[1].append_to(sched)
 
-    assert task in sched
-    assert chks[0] in sched[task]
-    assert chks[1] in sched[task]
+    assert sched.hastask(task)
+    assert chks[0] in sched.task(task)
+    assert chks[1] in sched.task(task)
 
     with pytest.raises(ConstraintError):
         chks[2].append_to(sched)

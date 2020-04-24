@@ -28,10 +28,10 @@ class Property(metaclass=ABCMeta):
 
 
 class Operator(metaclass=ABCMeta):
-    def __init__(self, task: "Task", start_time: float, proc_times: Dict[Any, float]):
+    def __init__(self, task: "Task", start_time: float, proctimes: Dict[Any, float]):
         self.task = task
         self.start_time = start_time
-        self.proc_times = proc_times
+        self.proctimes = proctimes
 
     @abstractmethod
     def apply(self, schedule: "Schedule"):
@@ -66,14 +66,14 @@ class Task:
 
 
 class Chunk:
-    def __init__(self, task: "Task", start_time: float, proc_times: Dict[Any, float]):
+    def __init__(self, task: "Task", start_time: float, proctimes: Dict[Any, float]):
         self.task = task
         self.start_time = start_time
-        self.proc_times = proc_times
+        self.proctimes = proctimes
 
     def completion_time(self, node: Any) -> float:
-        if node in self.proc_times:
-            return self.start_time + self.proc_times[node]
+        if node in self.proctimes:
+            return self.start_time + self.proctimes[node]
         else:
             return inf
 
@@ -94,7 +94,7 @@ class Chunk:
         else:
             schedule.taskmap[self.task] = [self]
 
-        for node in self.proc_times:
+        for node in self.proctimes:
             if node in schedule.nodemap:
                 schedule.nodemap[node].add(self)
             else:
@@ -103,7 +103,7 @@ class Chunk:
     def remove_from(self, schedule: "Schedule"):
         schedule.taskmap[self.task].remove(self)
 
-        for node in self.proc_times:
+        for node in self.proctimes:
             schedule.nodemap[node].remove(self)
 
 

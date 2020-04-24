@@ -29,7 +29,7 @@ class ProcessedTimesProperty(Property):
             prcs_times = {}
 
             for chk in schedule.task(self.task):
-                for node, ptime in chk.proc_times.items():
+                for node, ptime in chk.proctimes.items():
                     if node in prcs_times:
                         prcs_times[node] += ptime
                     else:
@@ -57,6 +57,6 @@ class CompletionTimeProperty(Property):
 
     def get(self, schedule: "Schedule") -> Optional[float]:
         if schedule.hastask(self.task):
-            return max(max(chk.completion_time(node) for node in chk.proc_times) for chk in schedule.task(self.task))
+            return max(max(chk.completion_time(node) for node in chk.proctimes) for chk in schedule.task(self.task))
         else:
             return None

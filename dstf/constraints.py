@@ -8,9 +8,9 @@ class NoSimultaneousExecutionConstraint(Constraint):
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         for tsk in schedule.tasks():
             for chk in schedule.task(tsk):
-                for node, ptime in chunk.proc_times.items():
-                    if (node in chk.proc_times
-                            and chunk.start_time < chk.start_time + chk.proc_times[node]
+                for node, ptime in chunk.proctimes.items():
+                    if (node in chk.proctimes
+                            and chunk.start_time < chk.start_time + chk.proctimes[node]
                             and chunk.start_time + ptime > chk.start_time):
                         return False
 
@@ -24,7 +24,7 @@ class NoMigrationConstraint(Constraint):
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         if schedule.hastask(chunk.task):
             for chk in schedule.task(chunk.task):
-                if not set(chk.proc_times).issuperset(chunk.proc_times):
+                if not set(chk.proctimes).issuperset(chunk.proctimes):
                     return False
 
         return True
@@ -40,7 +40,7 @@ class ProcessingTimesConstraint(Constraint):
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         prcs_times = schedule.get(ProcessedTimesProperty(chunk.task))
 
-        for node, ptime in chunk.proc_times.items():
+        for node, ptime in chunk.proctimes.items():
             if prcs_times is None:
                 rmn_ptime = self.processing_times[node]
             else:
@@ -71,7 +71,7 @@ class DeadlineConstraint(Constraint):
         self.deadline = deadline
 
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
-        for node, ptime in chunk.proc_times.items():
+        for node, ptime in chunk.proctimes.items():
             if chunk.start_time + ptime > self.deadline:
                 return False
 
@@ -86,7 +86,7 @@ class MultipurposeMachinesConstraint(Constraint):
         self.compatible_nodes = compatible_nodes
 
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
-        for node in chunk.proc_times:
+        for node in chunk.proctimes:
             if node not in self.compatible_nodes:
                 return False
 
@@ -101,7 +101,7 @@ class ExecutionSizeConstraint(Constraint):
         self.execution_size = execution_size
 
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
-        return len(chunk.proc_times) == self.execution_size
+        return len(chunk.proctimes) == self.execution_size
 
     def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
         return "'{}' task should be processed by {} nodes".format(chunk.task.name, self.execution_size)
@@ -112,7 +112,7 @@ class ExecutionNodesConstraint(Constraint):
         self.execution_nodes = execution_nodes
 
     def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
-        return set(chunk.proc_times) == set(self.execution_nodes)
+        return set(chunk.proctimes) == set(self.execution_nodes)
 
     def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
         return "'{}' task should be processed by {}".format(chunk.task.name, self.execution_nodes)

@@ -6,10 +6,9 @@ def test_apply__append():
     node = "n0"
     sched = Schedule().apply(AppendOperator(task, 0, {node: 10}))
 
-    assert task in sched
-    assert len(sched[task]) == 1
-    assert sched[task][0].start_time == 0
-    assert sched[task][0].proc_times == {node: 10}
+    assert sched.hastask(task)
+    assert sched.task(task)[0].start_time == 0
+    assert sched.task(task)[0].proctimes == {node: 10}
 
 
 def test_apply__preempt():
@@ -17,9 +16,8 @@ def test_apply__preempt():
     node = "n0"
     sched = Schedule().apply(AppendOperator(task, 0, {node: 10})).apply(PreemptOperator(task, 5, {node: 10}))
 
-    assert task in sched
-    assert len(sched[task]) == 2
-    assert sched[task][0].start_time == 0
-    assert sched[task][0].proc_times == {node: 5}
-    assert sched[task][1].start_time == 5
-    assert sched[task][1].proc_times == {node: 10}
+    assert sched.hastask(task)
+    assert sched.task(task)[0].start_time == 0
+    assert sched.task(task)[0].proctimes == {node: 5}
+    assert sched.task(task)[1].start_time == 5
+    assert sched.task(task)[1].proctimes == {node: 10}
