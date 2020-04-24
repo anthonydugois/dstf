@@ -1,4 +1,5 @@
 from dstf.core import Operator, Schedule, Chunk
+from dstf.properties import ChunksAtProperty
 
 
 class AppendOperator(Operator):
@@ -8,21 +9,22 @@ class AppendOperator(Operator):
 
 class PreemptOperator(Operator):
     def apply(self, schedule: "Schedule"):
-        for tsk in schedule:
-            for chk in schedule[tsk]:
-                proc_times = chk.proc_times.copy()
+        chks = schedule.get(ChunksAtProperty(self.start_time))
 
-                for node, ptime in self.proc_times.items():
-                    if node in proc_times and chk.start_time <= self.start_time < chk.start_time + chk.proc_times[node]:
-                        if self.start_time <= chk.start_time:
-                            del proc_times[node]
-                        else:
-                            proc_times[node] = self.start_time - chk.start_time
+        for chk in chks:
+            proctimes = chk.proc_times.copy()
 
-                if proc_times != chk.proc_times:
-                    schedule[tsk].remove(chk)
+            for node, ptime in self.proc_times.items():
+                if node in proctimes and chk.start_time <= self.start_time < chk.start_time + chk.proc_times[node]:
+                    if self.start_time <= chk.start_time:
+                        del proctimes[node]
+                    else:
+                        proctimes[node] = self.start_time - chk.start_time
 
-                    if proc_times:
-                        Chunk(chk.task, chk.start_time, proc_times).append_to(schedule)
+            if proctimes != chk.proc_times:
+                chk.remove_from(schedule)
+
+                if proctimes:
+                    Chunk(chk.task, chk.start_time, proctimes).append_to(schedule)
 
         Chunk(self.task, self.start_time, self.proc_times).append_to(schedule)

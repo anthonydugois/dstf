@@ -101,10 +101,17 @@ class Chunk:
             else:
                 schedule.nodemap[node] = ChunkTree(node).add(self)
 
+    def remove_from(self, schedule: "Schedule"):
+        schedule.chunk_map[self.task].remove(self)
+
+        for node in self.proc_times:
+            schedule.nodemap[node].remove(self)
+
 
 class ChunkNode:
     def __init__(self, chunk: "Chunk"):
         self.chunk = chunk
+        self.height = 1
         self.left = None
         self.right = None
 
@@ -114,41 +121,163 @@ class ChunkTree:
         self.node = node
         self.root = None
 
-    def add(self, chunk: "Chunk") -> "ChunkTree":
-        if self.root is None:
-            self.root = ChunkNode(chunk)
+    def __iter__(self) -> Optional[Iterator["ChunkNode"]]:
+        return self.iter_from(self.root)
+
+    def iter_from(self, root: Optional["ChunkNode"]) -> Optional[Iterator["ChunkNode"]]:
+        if root is None:
+            return None
         else:
-            self.insert(self.root, chunk)
+            yield from self.iter_from(root.left)
+            yield root
+            yield from self.iter_from(root.right)
+
+    def get(self, time: float) -> Optional["ChunkNode"]:
+        return self.get_from(self.root, time)
+
+    def get_from(self, root: "ChunkNode", time: float) -> Optional["ChunkNode"]:
+        if root is None:
+            return None
+        else:
+            if root.chunk.start_time <= time < root.chunk.completion_time(self.node):
+                return root
+            elif time < root.chunk.start_time:
+                return self.get_from(root.left, time)
+            elif time >= root.chunk.completion_time(self.node):
+                return self.get_from(root.right, time)
+            else:
+                return None
+
+    def add(self, chunk: "Chunk") -> "ChunkTree":
+        self.root = self.add_from(self.root, chunk)
 
         return self
 
-    def insert(self, parent: "ChunkNode", chunk: "Chunk") -> "ChunkTree":
-        if chunk.completion_time(self.node) <= parent.chunk.start_time:
-            if parent.left is None:
-                parent.left = ChunkNode(chunk)
+    def add_from(self, root: "ChunkNode", chunk: "Chunk") -> "ChunkNode":
+        if root is None:
+            return ChunkNode(chunk)
+        else:
+            if chunk.completion_time(self.node) <= root.chunk.start_time:
+                root.left = self.add_from(root.left, chunk)
+            elif chunk.start_time >= root.chunk.completion_time(self.node):
+                root.right = self.add_from(root.right, chunk)
             else:
-                self.insert(parent.left, chunk)
-        elif chunk.start_time >= parent.chunk.completion_time(self.node):
-            if parent.right is None:
-                parent.right = ChunkNode(chunk)
-            else:
-                self.insert(parent.right, chunk)
+                return root
+
+            root.height = 1 + max(self.height(root.left), self.height(root.right))
+
+            return self.rotate(root)
+
+    def remove(self, chunk: "Chunk") -> "ChunkTree":
+        self.root = self.remove_from(self.root, chunk)
 
         return self
 
-    def get(self, time: float) -> Optional["Chunk"]:
-        current = self.root
+    def remove_from(self, root: "ChunkNode", chunk: "Chunk") -> Optional["ChunkNode"]:
+        if root is None:
+            return None
+        else:
+            if chunk.completion_time(self.node) <= root.chunk.start_time:
+                root.left = self.remove_from(root.left, chunk)
+            elif chunk.start_time >= root.chunk.completion_time(self.node):
+                root.right = self.remove_from(root.right, chunk)
+            else:
+                if root.left is None:
+                    return root.right
+                elif root.right is None:
+                    return root.left
+                else:
+                    successor = self.min_from(root.right)
 
-        while (current is not None
-               and (time < current.chunk.start_time or time >= current.chunk.completion_time(self.node))):
-            if time < current.chunk.start_time and current.left is not None:
+                    root.chunk = successor.chunk
+
+                    root.right = self.remove_from(root.right, successor.chunk)
+
+            root.height = 1 + max(self.height(root.left), self.height(root.right))
+
+            return self.rotate(root)
+
+    def rotate(self, root: "ChunkNode") -> "ChunkNode":
+        balance = self.balance(root)
+
+        if balance > 1 and self.balance(root.left) >= 0:
+            return self.rotate_right(root)
+        elif balance > 1 and self.balance(root.left) < 0:
+            root.left = self.rotate_left(root.left)
+
+            return self.rotate_right(root)
+        elif balance < -1 and self.balance(root.right) <= 0:
+            return self.rotate_left(root)
+        elif balance < -1 and self.balance(root.right) > 0:
+            root.right = self.rotate_right(root.right)
+
+            return self.rotate_left(root)
+        else:
+            return root
+
+    def rotate_left(self, root: "ChunkNode") -> "ChunkNode":
+        pivot = root.right
+        child = pivot.left
+
+        pivot.left = root
+        root.right = child
+
+        root.height = 1 + max(self.height(root.left), self.height(root.right))
+        pivot.height = 1 + max(self.height(pivot.left), self.height(pivot.right))
+
+        return pivot
+
+    def rotate_right(self, root: "ChunkNode") -> "ChunkNode":
+        pivot = root.left
+        child = pivot.right
+
+        pivot.right = root
+        root.left = child
+
+        root.height = 1 + max(self.height(root.left), self.height(root.right))
+        pivot.height = 1 + max(self.height(pivot.left), self.height(pivot.right))
+
+        return pivot
+
+    def balance(self, root: "ChunkNode") -> int:
+        if root is None:
+            return 0
+        else:
+            return self.height(root.left) - self.height(root.right)
+
+    def height(self, root: "ChunkNode") -> int:
+        if root is None:
+            return 0
+        else:
+            return root.height
+
+    def min(self) -> Optional["ChunkNode"]:
+        return self.min_from(self.root)
+
+    def min_from(self, root: "ChunkNode") -> Optional["ChunkNode"]:
+        if root is None:
+            return None
+        else:
+            current = root
+
+            while current.left is not None:
                 current = current.left
-            elif time >= current.chunk.completion_time(self.node) and current.right is not None:
-                current = current.right
-            else:
-                current = None
 
-        return current
+            return current
+
+    def max(self) -> Optional["ChunkNode"]:
+        return self.max_from(self.root)
+
+    def max_from(self, root: "ChunkNode") -> Optional["ChunkNode"]:
+        if root is None:
+            return None
+        else:
+            current = root
+
+            while current.right is not None:
+                current = current.right
+
+            return current
 
 
 class Schedule:
