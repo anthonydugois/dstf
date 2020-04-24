@@ -1,4 +1,4 @@
-from typing import Optional, Any, Dict, List
+from typing import Optional, Any, Dict, Set
 
 from dstf.core import Property, Schedule, Task, Chunk
 
@@ -7,15 +7,15 @@ class ChunksAtProperty(Property):
     def __init__(self, time: float):
         self.time = time
 
-    def get(self, schedule: "Schedule") -> List["Chunk"]:
-        chks = []
+    def get(self, schedule: "Schedule") -> Set["Chunk"]:
+        chks = set()
 
         for node in schedule.nodes():
             tree = schedule.node(node)
             treenodes = tree.at(self.time)
 
             for treenode in treenodes:
-                chks.append(treenode.chunk)
+                chks.add(treenode.chunk)
 
         return chks
 

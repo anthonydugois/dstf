@@ -14,8 +14,10 @@ class PreemptOperator(Operator):
         for chk in chks:
             proctimes = chk.proctimes.copy()
 
-            for node, ptime in self.proctimes.items():
-                if node in proctimes and chk.start_time <= self.start_time < chk.start_time + chk.proctimes[node]:
+            for node in proctimes:
+                if (node in self.proctimes
+                        and self.start_time < chk.completion_time(node)
+                        and chk.start_time < self.start_time + self.proctimes[node]):
                     if self.start_time <= chk.start_time:
                         del proctimes[node]
                     else:
