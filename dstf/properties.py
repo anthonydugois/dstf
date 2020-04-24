@@ -12,9 +12,9 @@ class ChunksAtProperty(Property):
 
         for node in schedule.nodes():
             tree = schedule.node(node)
-            treenode = tree.get(self.time)
+            treenodes = tree.at(self.time)
 
-            if treenode is not None:
+            for treenode in treenodes:
                 chks.append(treenode.chunk)
 
         return chks
