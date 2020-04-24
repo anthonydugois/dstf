@@ -26,16 +26,16 @@ class ProcessedTimesProperty(Property):
 
     def get(self, schedule: "Schedule") -> Optional[Dict[Any, float]]:
         if schedule.hastask(self.task):
-            prcs_times = {}
+            processed = {}
 
             for chk in schedule.task(self.task):
                 for node, ptime in chk.proctimes.items():
-                    if node in prcs_times:
-                        prcs_times[node] += ptime
+                    if node in processed:
+                        processed[node] += ptime
                     else:
-                        prcs_times[node] = ptime
+                        processed[node] = ptime
 
-            return prcs_times
+            return processed
         else:
             return None
 

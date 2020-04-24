@@ -14,7 +14,7 @@ class ConstraintError(Error):
 
 class Constraint(metaclass=ABCMeta):
     @abstractmethod
-    def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
+    def isvalid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         pass
 
     def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
@@ -77,16 +77,16 @@ class Chunk:
         else:
             return inf
 
-    def is_valid(self, schedule: "Schedule") -> bool:
+    def isvalid(self, schedule: "Schedule") -> bool:
         for ctr in self.task.constraints.values():
-            if not ctr.is_valid(schedule, self):
+            if not ctr.isvalid(schedule, self):
                 return False
 
         return True
 
     def append_to(self, schedule: "Schedule"):
         for ctr in self.task.constraints.values():
-            if not ctr.is_valid(schedule, self):
+            if not ctr.isvalid(schedule, self):
                 raise ConstraintError(ctr.get_error(schedule, self))
 
         if self.task in schedule.taskmap:

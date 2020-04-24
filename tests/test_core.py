@@ -24,16 +24,16 @@ def test_getattr__task():
         attr = task.not_found_attribute
 
 
-def test_is_valid__chunk():
+def test_isvalid__chunk():
     task = Task("t0")
     node = "n0"
     sched = Schedule()
 
     task.set(ReleaseTimeConstraint(10))
 
-    assert Chunk(task, 10, {node: 10}).is_valid(sched)
-    assert Chunk(task, 11, {node: 10}).is_valid(sched)
-    assert not Chunk(task, 9, {node: 10}).is_valid(sched)
+    assert Chunk(task, 10, {node: 10}).isvalid(sched)
+    assert Chunk(task, 11, {node: 10}).isvalid(sched)
+    assert not Chunk(task, 9, {node: 10}).isvalid(sched)
 
 
 def test_append_to__chunk():

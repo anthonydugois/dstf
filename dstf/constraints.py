@@ -5,7 +5,7 @@ from dstf.properties import ProcessedTimesProperty
 
 
 class NoSimultaneousExecutionConstraint(Constraint):
-    def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
+    def isvalid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         for tsk in schedule.tasks():
             for chk in schedule.task(tsk):
                 for node, ptime in chunk.proctimes.items():
@@ -21,7 +21,7 @@ class NoSimultaneousExecutionConstraint(Constraint):
 
 
 class NoMigrationConstraint(Constraint):
-    def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
+    def isvalid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         if schedule.hastask(chunk.task):
             for chk in schedule.task(chunk.task):
                 if not set(chk.proctimes).issuperset(chunk.proctimes):
@@ -37,16 +37,16 @@ class ProcessingTimesConstraint(Constraint):
     def __init__(self, processing_times: Dict[Any, float]):
         self.processing_times = processing_times
 
-    def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
-        prcs_times = schedule.get(ProcessedTimesProperty(chunk.task))
+    def isvalid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
+        processed = schedule.get(ProcessedTimesProperty(chunk.task))
 
         for node, ptime in chunk.proctimes.items():
-            if prcs_times is None:
-                rmn_ptime = self.processing_times[node]
+            if processed is None:
+                rmntime = self.processing_times[node]
             else:
-                rmn_ptime = self.processing_times[node] - prcs_times[node]
+                rmntime = self.processing_times[node] - processed[node]
 
-            if ptime > rmn_ptime:
+            if ptime > rmntime:
                 return False
 
         return True
@@ -59,7 +59,7 @@ class ReleaseTimeConstraint(Constraint):
     def __init__(self, release_time: float):
         self.release_time = release_time
 
-    def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
+    def isvalid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         return chunk.start_time >= self.release_time
 
     def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
@@ -70,7 +70,7 @@ class DeadlineConstraint(Constraint):
     def __init__(self, deadline: float):
         self.deadline = deadline
 
-    def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
+    def isvalid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         for node, ptime in chunk.proctimes.items():
             if chunk.start_time + ptime > self.deadline:
                 return False
@@ -85,7 +85,7 @@ class MultipurposeMachinesConstraint(Constraint):
     def __init__(self, compatible_nodes: List[Any]):
         self.compatible_nodes = compatible_nodes
 
-    def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
+    def isvalid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         for node in chunk.proctimes:
             if node not in self.compatible_nodes:
                 return False
@@ -100,7 +100,7 @@ class ExecutionSizeConstraint(Constraint):
     def __init__(self, execution_size: int):
         self.execution_size = execution_size
 
-    def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
+    def isvalid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         return len(chunk.proctimes) == self.execution_size
 
     def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
@@ -111,7 +111,7 @@ class ExecutionNodesConstraint(Constraint):
     def __init__(self, execution_nodes: List[Any]):
         self.execution_nodes = execution_nodes
 
-    def is_valid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
+    def isvalid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         return set(chunk.proctimes) == set(self.execution_nodes)
 
     def get_error(self, schedule: "Schedule", chunk: "Chunk") -> str:
