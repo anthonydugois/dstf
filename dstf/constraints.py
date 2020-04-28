@@ -1,18 +1,16 @@
 from typing import Any, List, Dict
 
 from dstf.core import Constraint, Schedule, Chunk
-from dstf.properties import ProcessedTimesProperty
 
 
 class NoSimultaneousExecutionConstraint(Constraint):
     def isvalid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
-        for tsk in schedule.tasks():
-            for chk in schedule.task(tsk):
-                for node, ptime in chunk.proctimes.items():
-                    if (node in chk.proctimes
-                            and chunk.start_time < chk.start_time + chk.proctimes[node]
-                            and chunk.start_time + ptime > chk.start_time):
-                        return False
+        for node in chunk.proctimes:
+            tree = schedule.node(node)
+            treenodes = tree.over(chunk.start_time, chunk.completion_time(node))
+
+            if len(treenodes) > 0:
+                return False
 
         return True
 
@@ -38,16 +36,19 @@ class ProcessingTimesConstraint(Constraint):
         self.processing_times = processing_times
 
     def isvalid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
-        processed = schedule.get(ProcessedTimesProperty(chunk.task))
+        if schedule.hastask(chunk.task):
+            processed = {}
 
-        for node, ptime in chunk.proctimes.items():
-            if processed is None:
-                rmntime = self.processing_times[node]
-            else:
-                rmntime = self.processing_times[node] - processed[node]
+            for chk in schedule.task(chunk.task):
+                for node, ptime in chk.proctimes.items():
+                    if node in processed:
+                        processed[node] += ptime
+                    else:
+                        processed[node] = ptime
 
-            if ptime > rmntime:
-                return False
+            for node, ptime in chunk.proctimes.items():
+                if ptime > self.processing_times[node] - processed[node]:
+                    return False
 
         return True
 

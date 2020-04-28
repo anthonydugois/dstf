@@ -20,6 +20,24 @@ class ChunksAtProperty(Property):
         return chks
 
 
+class ChunksOverProperty(Property):
+    def __init__(self, lo: float, hi: float):
+        self.lo = lo
+        self.hi = hi
+
+    def get(self, schedule: "Schedule") -> Set["Chunk"]:
+        chks = set()
+
+        for node in schedule.nodes():
+            tree = schedule.node(node)
+            treenodes = tree.over(self.lo, self.hi)
+
+            for treenode in treenodes:
+                chks.add(treenode.chunk)
+
+        return chks
+
+
 class ProcessedTimesProperty(Property):
     def __init__(self, task: "Task"):
         self.task = task
