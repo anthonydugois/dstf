@@ -6,11 +6,12 @@ from dstf.core import Constraint, Schedule, Chunk
 class NoSimultaneousExecutionConstraint(Constraint):
     def isvalid(self, schedule: "Schedule", chunk: "Chunk") -> bool:
         for node in chunk.proctimes:
-            tree = schedule.node(node)
-            treenodes = tree.over(chunk.start_time, chunk.completion_time(node))
+            if schedule.hasnode(node):
+                tree = schedule.node(node)
+                treenodes = tree.over(chunk.start_time, chunk.completion_time(node))
 
-            if len(treenodes) > 0:
-                return False
+                if len(treenodes) > 0:
+                    return False
 
         return True
 
