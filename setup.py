@@ -4,7 +4,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setuptools.setup(name="dstf",
-                 version="0.0.9",
+                 version="0.0.10",
                  packages=setuptools.find_packages(),
                  url="https://github.com/anthonydugois/dstf",
                  author="Anthony Dugois",
