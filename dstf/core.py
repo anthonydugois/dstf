@@ -28,13 +28,8 @@ class Property(metaclass=ABCMeta):
 
 
 class Operator(metaclass=ABCMeta):
-    def __init__(self, task: "Task", start_time: float, proctimes: Dict[Any, float]):
-        self.task = task
-        self.start_time = start_time
-        self.proctimes = proctimes
-
     @abstractmethod
-    def apply(self, schedule: "Schedule"):
+    def apply(self, schedule: "Schedule") -> Any:
         pass
 
 
@@ -354,7 +349,5 @@ class Schedule:
     def get(self, prop: "Property") -> Any:
         return prop.get(self)
 
-    def apply(self, operator: "Operator") -> "Schedule":
-        operator.apply(self)
-
-        return self
+    def apply(self, operator: "Operator") -> Any:
+        return operator.apply(self)

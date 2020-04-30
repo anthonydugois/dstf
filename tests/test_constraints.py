@@ -4,7 +4,9 @@ from dstf import *
 def test_isvalid__no_simultaneous_execution():
     task = Task("t0")
     node = "n0"
-    sched = Schedule().apply(AppendOperator(task, 10, {node: 10}))
+    sched = Schedule()
+
+    sched.apply(AppendOperator(Chunk(task, 10, {node: 10})))
 
     ctr = NoSimultaneousExecutionConstraint()
 
@@ -18,7 +20,9 @@ def test_isvalid__no_simultaneous_execution():
 def test_isvalid__no_migration():
     task = Task("t0")
     nodes = ["n{}".format(i) for i in range(3)]
-    sched = Schedule().apply(AppendOperator(task, 0, {nodes[0]: 10}))
+    sched = Schedule()
+
+    sched.apply(AppendOperator(Chunk(task, 0, {nodes[0]: 10})))
 
     ctr = NoMigrationConstraint()
 
@@ -29,7 +33,9 @@ def test_isvalid__no_migration():
 def test_isvalid__processing_times():
     task = Task("t0")
     node = "n0"
-    sched = Schedule().apply(AppendOperator(task, 0, {node: 5}))
+    sched = Schedule()
+
+    sched.apply(AppendOperator(Chunk(task, 0, {node: 5})))
 
     ctr = ProcessingTimesConstraint({node: 10})
 
