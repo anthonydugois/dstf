@@ -3,6 +3,8 @@ from collections import OrderedDict
 from math import inf
 from typing import Iterator, Any, List, Dict, Type, Optional
 
+EPSILON = 1e-4
+
 
 class Error(Exception):
     pass

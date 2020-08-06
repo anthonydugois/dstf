@@ -39,8 +39,9 @@ def test_isvalid__processing_times():
 
     ctr = ProcessingTimesConstraint({node: 10})
 
-    assert ctr.isvalid(sched, Chunk(task, 5, {node: 5}))
+    assert ctr.isvalid(sched, Chunk(task, 5, {node: 5.000001}))
     assert ctr.isvalid(sched, Chunk(task, 5, {node: 2}))
+    assert not ctr.isvalid(sched, Chunk(task, 5, {node: 5.001}))
     assert not ctr.isvalid(sched, Chunk(task, 5, {node: 6}))
 
 

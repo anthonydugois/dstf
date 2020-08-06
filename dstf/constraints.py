@@ -1,6 +1,6 @@
 from typing import Any, List, Dict
 
-from dstf.core import Constraint, Schedule, Chunk
+from dstf.core import EPSILON, Constraint, Schedule, Chunk
 
 
 class NoSimultaneousExecutionConstraint(Constraint):
@@ -45,7 +45,7 @@ class ProcessingTimesConstraint(Constraint):
                     if node in chk.proctimes:
                         processed += chk.proctimes[node]
 
-            if ptime > self.processing_times[node] - processed:
+            if ptime - (self.processing_times[node] - processed) > EPSILON:
                 return False
 
         return True
